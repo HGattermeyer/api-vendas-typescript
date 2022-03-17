@@ -34,8 +34,6 @@ export default class CustomersController {
       email,
     });
 
-    console.log(customer);
-
     return response.json(customer);
   }
 
