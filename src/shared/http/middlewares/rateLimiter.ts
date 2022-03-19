@@ -21,6 +21,7 @@ export default async function rateLimiter(
       points: 5,
       duration: 1,
     });
+
     await limiter.consume(request.ip);
 
     return next();
