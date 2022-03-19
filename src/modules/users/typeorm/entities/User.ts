@@ -6,7 +6,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
-import AppError from '@shared/errors/AppError';
 
 @Entity('users')
 class User {
