@@ -1,10 +1,11 @@
 import AppError from '@shared/errors/AppError';
-import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import authConfig from '@config/auth';
 import { getCustomRepository } from 'typeorm';
 import User from '../infra/typeorm/entities/User';
 import UsersRepository from '../infra/typeorm/repositories/UsersRepository';
+import { inject, injectable } from 'tsyringe';
+import { IHashProvider } from '../providers/HashProvider/Fakes/models/IHashProvider';
 
 interface IRequest {
   email: string;
@@ -16,7 +17,12 @@ interface IResponse {
   token: string;
 }
 
+@injectable()
 class CreateSessionsService {
+  constructor(
+    @inject('HashProvider')
+    private hashProvider: IHashProvider,
+  ) {}
   public async execute({ email, password }: IRequest): Promise<IResponse> {
     const usersRepository = getCustomRepository(UsersRepository);
     const user = await usersRepository.findByEmail(email);
@@ -25,7 +31,10 @@ class CreateSessionsService {
       throw new AppError('Incorrect email/password combination.', 401);
     }
 
-    const passwordConfirmed = await compare(password, user.password);
+    const passwordConfirmed = await this.hashProvider.compareHash(
+      password,
+      user.password,
+    );
 
     if (!passwordConfirmed) {
       throw new AppError('Incorrect email/password combination.', 401);
